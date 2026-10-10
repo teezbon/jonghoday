@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATEEZ TWIBBON</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #cf2727 50%, #ffffff 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 2000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: bold;
+            color: black;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .description {
+            font-size: 1.3rem;
+            color: #000000;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .twibbon-container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: linear-gradient(#ffffff, #3be343, #ffffff);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #twibbonCanvas {
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            cursor: grab;
+            max-width: 100%;
+            height: auto;
+            /* FIX: RATIO 1:1 */
+            width: 2048px;
+            height: 2048px;
+        }
+
+        #twibbonCanvas:active {
+            cursor: grabbing;
+        }
+
+        .controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            background: linear-gradient(45deg, #4a69bd, #5a85c7);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(74, 105, 189, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(74, 105, 189, 0.6);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            color: #000000;
+            font-weight: 500;
+        }
+
+        .control-slider {
+            width: 120px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffffff, #3d9141);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(74, 105, 189, 0.5);
+        }
+
+        .download-btn {
+            background: linear-gradient(#1b54bf, #1851ba, #1b54bf);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.6);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            color:#000000;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .twibbon-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .canvas-wrapper {
+                max-width: 400px;
+            }
+            
+            #twibbonCanvas {
+                width: 400px;
+                height: 260px;
+            }
+            
+            .control-group {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">ATEEZ TWIBBON</h1>
+            <p class="description">Let's celebrate JONGHO'S Birthday with using this twibbon and put #SweetAppleJongho on your name</p>
+        </div>
+
+        <div class="twibbon-container">
+            <div class="canvas-wrapper">
+                <canvas id="twibbonCanvas" width="1280" height="1280"></canvas>
+                <div class="controls">
+                    <div class="file-input-wrapper">
+                        <label for="fileInput" class="file-input-label">
+                             Choose Your Picture
+                        </label>
+                        <input type="file" id="fileInput" accept="image/*">
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label class="control-label">Geser X</label>
+                            <input type="range" class="control-slider" id="posX" min="-250" max="250" value="0">
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label">Geser Y</label>
+                            <input type="range" class="control-slider" id="posY" min="-250" max="250" value="0">
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label">Ukuran</label>
+                            <input type="range" class="control-slider" id="scale" min="0.2" max="1.2" step="0.05" value="0.5">
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label">Rotasi</label>
+                            <input type="range" class="control-slider" id="rotate" min="-30" max="30" value="0">
+                        </div>
+                    </div>
+                    
+                    <button class="download-btn" id="downloadBtn" disabled>
+                         Download
+                    </button>
+                    
+                    <div class="info">
+                        Drag foto untuk memindahkan posisi • Gunakan slider untuk fine-tune
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TwibbonMaker {
+            constructor() {
+                this.canvas = document.getElementById('twibbonCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.userImage = null;
+                this.twibbonImage = null; // ✅ FIX: Rename untuk clarity
+                this.posX = 0;
+                this.posY = 0;
+                this.scale = 0.5;
+                this.rotation = 0;
+                this.isDragging = false;
+                this.dragStart = { x: 0, y: 0 };
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadTwibbonFrame();
+            }
+
+            setupEventListeners() {
+                const fileInput = document.getElementById('fileInput');
+                const posXSlider = document.getElementById('posX');
+                const posYSlider = document.getElementById('posY');
+                const scaleSlider = document.getElementById('scale');
+                const rotateSlider = document.getElementById('rotate');
+                const downloadBtn = document.getElementById('downloadBtn');
+
+                fileInput.addEventListener('change', (e) => this.loadUserImage(e));
+                posXSlider.addEventListener('input', (e) => {
+                    this.posX = parseFloat(e.target.value);
+                    this.render();
+                });
+                posYSlider.addEventListener('input', (e) => {
+                    this.posY = parseFloat(e.target.value);
+                    this.render();
+                });
+                scaleSlider.addEventListener('input', (e) => {
+                    this.scale = parseFloat(e.target.value);
+                    this.render();
+                });
+                rotateSlider.addEventListener('input', (e) => {
+                    this.rotation = parseFloat(e.target.value);
+                    this.render();
+                });
+                downloadBtn.addEventListener('click', () => this.download());
+
+                // Drag events
+                this.canvas.addEventListener('mousedown', (e) => this.startDrag(e));
+                this.canvas.addEventListener('mousemove', (e) => this.drag(e));
+                this.canvas.addEventListener('mouseup', () => this.stopDrag());
+                this.canvas.addEventListener('mouseleave', () => this.stopDrag());
+
+                // Touch events for mobile
+                this.canvas.addEventListener('touchstart', (e) => this.startDrag(e.touches[0]));
+                this.canvas.addEventListener('touchmove', (e) => this.drag(e.touches[0]));
+                this.canvas.addEventListener('touchend', () => this.stopDrag());
+            }
+
+            loadTwibbonFrame() {
+                // GANTI INI DENGAN PATH KE PNG TWIBBON KAMU
+                const twibbonImg = new Image();
+                twibbonImg.crossOrigin = 'anonymous';
+                twibbonImg.onload = () => {
+                    this.twibbonImage = twibbonImg;
+                    this.render();
+                };
+                twibbonImg.onerror = () => {
+                    console.log('Twibbon image not found. Make sure TWIBBON.png exists!');
+                };
+                twibbonImg.src = 'jongho.png'; // ← UBAH INI DENGAN FILE PNG TWIBBON KAMU
+            }
+
+            loadUserImage(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            this.userImage = img;
+                            document.getElementById('downloadBtn').disabled = false;
+                            this.render();
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            startDrag(e) {
+                if (!this.userImage) return;
+                this.isDragging = true;
+                this.dragStart = {
+                    x: e.clientX - this.posX,
+                    y: e.clientY - this.posY
+                };
+            }
+
+            drag(e) {
+                if (!this.isDragging || !this.userImage) return;
+                
+                this.posX = e.clientX - this.dragStart.x;
+                this.posY = e.clientY - this.dragStart.y;
+                
+                document.getElementById('posX').value = this.posX;
+                document.getElementById('posY').value = this.posY;
+                
+                this.render();
+            }
+
+            stopDrag() {
+                this.isDragging = false;
+            }
+
+            render() {
+                // ✅ FIX 1: Clear canvas dulu
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // ✅ FIX 2: Gambar USER PHOTO dulu (layer bawah)
+                if (this.userImage) {
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2 + this.posX, this.canvas.height / 2 + this.posY);
+                    this.ctx.rotate((this.rotation * Math.PI) / 180);
+                    this.ctx.scale(this.scale, this.scale);
+                    this.ctx.drawImage(
+                        this.userImage,
+                        -this.userImage.width / 2,
+                        -this.userImage.height / 2,
+                        this.userImage.width,
+                        this.userImage.height
+                    );
+                    this.ctx.restore();
+                }
+
+                // ✅ Gambar TWIBBON FRAME terakhir (layer atas)
+                if (this.twibbonImage) {
+                    // ✅ FIX 3: Maintain aspect ratio 1:1 tanpa stretch
+                    const canvasSize = Math.min(this.canvas.width, this.canvas.height);
+                    this.ctx.drawImage(
+                        this.twibbonImage,
+                        0, 0, canvasSize, canvasSize
+                    );
+                }
+            }
+
+            download() {
+                if (!this.userImage || !this.twibbonImage) return;
+
+                this.canvas.toBlob((blob) => {
+                    const link = document.createElement('a');
+                    link.download = 'jongho.png';
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                }, 'image/png', 1.0);
+            }
+        }
+
+        // Initialize twibbon maker
+        new TwibbonMaker();
+    </script>
+</body>
+</html>
